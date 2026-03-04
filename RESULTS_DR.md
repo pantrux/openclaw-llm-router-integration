@@ -43,6 +43,8 @@ Este documento contiene la evidencia técnica de la ejecución del [Plan de Vali
 
 ### 🟠 Test 1.3: Tier COMPLEX / Agentic
 * **Prompt:** `"Diseña una arquitectura de microservicios en Kubernetes, implementando despliegue continuo con herramientas modernas y escalabilidad y pipelines y CI CD."`
+* **Output del Modelo:**
+  > "Para diseñar una arquitectura de microservicios robusta en Kubernetes con un ecosistema de CI/CD moderno, seguiremos el principio de GitOps y la Observabilidad en profundidad. [...] Aquí tienes el diseño técnico nivel Senior para este ecosistema: Ingress Layer con NGINX/Traefik, Service Mesh con Istio, y pipeline CI/CD usando GitHub Actions y ArgoCD." *(Resumen truncado)*
 * **Evidencia en Logs:** *(Detectó comandos imperativos de infraestructura)*
   ```log
   [claw-llm-router] classify: tier=COMPLEX method=rule-based signals=[imperative (implement)]
@@ -52,6 +54,8 @@ Este documento contiene la evidencia técnica de la ejecución del [Plan de Vali
 
 ### 🔴 Test 1.4: Tier REASONING
 * **Prompt:** `"I need you to prove Fermat's Last Theorem logically, step by step, using mathematical derivations."`
+* **Output del Modelo:**
+  > "Pantrux, me pides que reproduzca ~130 páginas de matemáticas de Andrew Wiles en un chat. [...] La prueba no ataca la ecuación directamente. En su lugar, sigue esta cadena lógica: Solución de Fermat → Curva de Frey → Semi-estable, no modular → Contradicción ← Taniyama-Shimura. [...]" *(Demostración generada exitosamente en streaming)*
 * **Evidencia en Logs (Forzado a modelo de alto razonamiento):**
   ```log
   [claw-llm-router] classify: tier=REASONING method=rule-based score=0.090 conf=0.85 signals=[short (30 tokens), reasoning (prove, theorem, step by step), reasoning override (3 markers)]
@@ -66,7 +70,10 @@ Este documento contiene la evidencia técnica de la ejecución del [Plan de Vali
 Para estas pruebas, se alteró la configuración (`openclaw.json`) inyectando IDs de modelos falsos (`-BROKEN`) para generar errores `404 Not Found` de los proveedores primarios.
 
 ### 💥 Simulación A: Fallo en el Tier Primario
-Se configuró el modelo base para que fallara y se comprobó que la cadena derivara al Fallback (`FB1`, `FB2`).
+Se configuró el modelo base (`gemini-3.1-pro-low`) para que fallara y se comprobó que la cadena derivara al Fallback (`FB1`).
+* **Prompt:** `"Resume los beneficios de la programación orientada a objetos en 3 viñetas breves y formato JSON."`
+* **Output del Modelo:** 
+  > "{\n  \"beneficios_poo\": [\n    \"Reutilización de código mediante herencia y composición.\",\n    \"Modularidad que facilita el mantenimiento y escalabilidad.\",\n    \"Abstracción y encapsulamiento para reducir la complejidad.\"\n  ]\n}" *(Respondido por el Fallback)*
 * **Evidencia en Logs:**
   ```log
   [claw-llm-router] route: tier=MEDIUM → google-antigravity/gemini-3.1-pro-low (method=rule-based, chain=[MEDIUM → MEDIUM_FB → COMPLEX])
